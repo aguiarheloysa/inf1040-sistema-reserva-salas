@@ -1,3 +1,14 @@
+/*
+ * Testes de integração: aqui os módulos REAIS trabalham juntos (sem stubs),
+ * exceto o canal de e-mail, trocado por receber() para não enviar mensagens.
+ *
+ * Cada cenário roda em um processo novo (Testes/test_unitarios.py) e começa
+ * chamando prepararCadastros(), que monta a mesma base inicial descrita no
+ * relatório. Dentro de um cenário os passos são sequenciais de propósito:
+ * o objetivo é justamente verificar que o estado deixado por uma operação
+ * é o que a próxima espera. Entre cenários não há estado compartilhado.
+ */
+
 
 #include <string.h>
 
@@ -6,7 +17,7 @@
 #include "reserva.h"
 #include "sala.h"
 #include "usuario.h"
-#include "verificar.h"
+#include "unitario.h"
 
 static int notificacoes;
 static int entregaDisponivel = 1;
@@ -17,7 +28,7 @@ static int receber(const NotEntrega lote[], int quantidade)
 {
     if (!entregaDisponivel)
         return 0;
-    VERIFICAR("entrega conjunta dos dois avisos", quantidade == 2 && notificacoes == 0);
+    VERIFICAR("no máximo dois avisos por lote", quantidade >= 1 && quantidade <= 2 && notificacoes == 0);
     for (int i = 0; i < quantidade; i++) {
         snprintf(enderecos[i], sizeof enderecos[0], "%s", lote[i].email);
         snprintf(mensagens[i], sizeof mensagens[0], "%s", lote[i].mensagem);
@@ -44,6 +55,7 @@ static void prepararCadastros(void)
 
 static void conciliarGrade(void)
 {
+    prepararCadastros();
     Data d = "19/10/2026";
     DataHora agora = {"19/10/2026", "07:00"};
     char salas[MAX_SALAS][TAM];
@@ -68,6 +80,7 @@ static void conciliarGrade(void)
 
 static void reservarLaboratorio(void)
 {
+    prepararCadastros();
     Data d = "19/10/2026";
     DataHora agora = {"19/10/2026", "07:00"};
     int id;
@@ -85,6 +98,7 @@ static void reservarLaboratorio(void)
 
 static void priorizarProva(void)
 {
+    prepararCadastros();
     Data d = "20/10/2026";
     DataHora preparo = {"20/10/2026", "08:00"};
     DataHora limite = {"20/10/2026", "12:00"};
@@ -117,7 +131,7 @@ static void priorizarProva(void)
               && strcmp(enderecos[1], "aluno2@example.test") == 0 && strstr(mensagens[0], "14:00")
               && strstr(mensagens[1], "15:00") && strstr(mensagens[0], "20/10/2026"));
     VERIFICAR("primeiro histórico de cancelamento", res_listarPorUsuario("A1", lista, &n) == RES_OK
-              && n == 2 && lista[1].id == primeiro && lista[1].situacao == CANCELADA);
+              && n == 1 && lista[0].id == primeiro && lista[0].situacao == CANCELADA);
     VERIFICAR("segundo histórico de cancelamento", res_listarPorUsuario("A2", lista, &n) == RES_OK
               && n == 1 && lista[0].id == segundo && lista[0].situacao == CANCELADA);
     VERIFICAR("novo ID é o único conflito", res_verificarConflito("L201", d, "14:30", "15:30", &id)
@@ -127,6 +141,7 @@ static void priorizarProva(void)
 
 static void autorizarProvaDuranteAulas(void)
 {
+    prepararCadastros();
     Data d = "19/10/2026";
     DataHora agora = {"19/10/2026", "08:00"};
     int id;
@@ -146,13 +161,60 @@ static void autorizarProvaDuranteAulas(void)
               5, PROVA, "", agora, &id) == RES_OK);
 }
 
-int main(void)
+static void regraDeAutorizacaoCompleta(void)
 {
     prepararCadastros();
-    conciliarGrade();
-    reservarLaboratorio();
-    priorizarProva();
-    autorizarProvaDuranteAulas();
-    puts("Integração dos módulos: OK");
-    return 0;
+    Data d = "19/10/2026";
+    DataHora agora = {"19/10/2026", "07:00"};
+    int id;
+
+    /* Aula de P1 na L201, 09h-11h. Quatro solicitantes para o mesmo horário. */
+    VERIFICAR("aluno não aplica prova", res_solicitar("A1", "L201", d, "09:00", "10:00",
+              5, PROVA, "", agora, &id) == RES_HORARIO_AULA);
+    VERIFICAR("outro professor sem autorização", res_solicitar("P2", "L201", d, "09:00", "10:00",
+              5, PROVA, "", agora, &id) == RES_HORARIO_AULA);
+    VERIFICAR("só o ministrante autoriza", grade_registrarAutorizacao("L201", d, "09:00", "P2", "P2")
+              == GRADE_NAO_MINISTRANTE);
+    VERIFICAR("ministrante autoriza P2", grade_registrarAutorizacao("L201", d, "09:00", "P1", "P2") == GRADE_OK);
+    VERIFICAR("autorização não vale para estudo", res_solicitar("P2", "L201", d, "09:00", "10:00",
+              5, ESTUDO, "", agora, &id) == RES_HORARIO_AULA);
+    VERIFICAR("outro professor com autorização", res_solicitar("P2", "L201", d, "09:00", "10:00",
+              5, PROVA, "", agora, &id) == RES_OK && id > 0);
+    VERIFICAR("próprio ministrante, horário restante", res_solicitar("P1", "L201", d, "10:00", "11:00",
+              5, PROVA, "", agora, &id) == RES_OK && id > 0);
+    VERIFICAR("autorização é só para aquela data", res_solicitar("P2", "L201", "26/10/2026", "09:00", "10:00",
+              5, PROVA, "", agora, &id) == RES_HORARIO_AULA);
+}
+
+static void fluxoCompletoDoAluno(void)
+{
+    prepararCadastros();
+    Data d = "21/10/2026";
+    DataHora agora = {"21/10/2026", "08:00"};
+    char salas[MAX_SALAS][TAM];
+    Reserva lista[MAX_RESERVAS];
+    int n, id;
+
+    VERIFICAR("busca", res_buscarSalasLivres(d, "14:00", "16:00", 8, 0, "A1", salas, &n) == RES_OK
+              && n == 2);
+    VERIFICAR("reserva da primeira sala livre", res_solicitar("A1", salas[0], d, "14:00", "16:00",
+              8, ESTUDO, "", agora, &id) == RES_OK);
+    VERIFICAR("sala some da busca", res_buscarSalasLivres(d, "14:00", "16:00", 8, 0, "A1", salas, &n)
+              == RES_OK && n == 1);
+    VERIFICAR("listagem", res_listarPorUsuario("A1", lista, &n) == RES_OK && n == 1
+              && lista[0].id == id && lista[0].situacao == ATIVA);
+    VERIFICAR("outro usuário não cancela", res_cancelar(id, "A2") == RES_NAO_AUTORIZADO);
+    VERIFICAR("titular cancela", res_cancelar(id, "A1") == RES_OK);
+    VERIFICAR("sala volta à busca", res_buscarSalasLivres(d, "14:00", "16:00", 8, 0, "A1", salas, &n)
+              == RES_OK && n == 2);
+    VERIFICAR("nenhum aviso enviado", notificacoes == 0);
+}
+
+int main(int argc, char *argv[])
+{
+    const CasoUnitario cenarios[] = {
+        CASO(conciliarGrade), CASO(reservarLaboratorio), CASO(priorizarProva),
+        CASO(autorizarProvaDuranteAulas), CASO(regraDeAutorizacaoCompleta), CASO(fluxoCompletoDoAluno)
+    };
+    return executarCasos(argc, argv, cenarios, sizeof cenarios / sizeof cenarios[0]);
 }

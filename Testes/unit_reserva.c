@@ -1,3 +1,42 @@
+/*
+ * Testes unitários do módulo Reserva (caixa-preta, automatizados).
+ *
+ * ISOLAMENTO DAS DEPENDÊNCIAS
+ * Reserva depende de Usuário, Sala, Grade e Notificação. Neste executável
+ * esses módulos NÃO são compilados (ver Makefile): no lugar deles estão os
+ * stubs definidos abaixo, com respostas fixas e conhecidas. Assim, se um caso
+ * falha, a causa só pode estar em Reserva. Os stubs são:
+ *   - Usuário:     A1, A2, M1 = ALUNO; P1, P2 = PROFESSOR; resto inexistente.
+ *   - Sala:        L201 (comum, 40, quadro), L105 (comum, 10), L301 (lab, 30);
+ *                  só M1 tem biometria, e só na L301.
+ *   - Grade:       aula na L201, 19/10/2026, 09h-11h, ministrante P1. Outro
+ *                  professor só tem permissão se o caso fizer autorizacao = 1.
+ *   - Notificação: não envia nada; conta as chamadas e guarda destinatários,
+ *                  ou simula falha de entrega se recusarEntrega = 1.
+ * Regras e Tempo são usados de verdade: são funções puras, sem estado, e têm
+ * seus próprios testes (unit_regras, unit_tempo).
+ *
+ * INDEPENDÊNCIA ENTRE OS CASOS
+ * O executor (Testes/test_unitarios.py) roda CADA caso em um processo novo.
+ * Com isso o vetor de reservas e as variáveis dos stubs começam sempre
+ * zerados: nenhum caso enxerga o que outro criou ou cancelou. Quando um caso
+ * precisa de uma reserva prévia (por exemplo, a R1 de A1 das 14h às 16h), ele
+ * mesmo a cria com prepararEstudo()/prepararReserva() — é o "estado inicial"
+ * declarado do caso.
+ *
+ * MAPA DAS REGRAS DE NEGÓCIO
+ *   RN1 capacidade ....... R3, capacidade_no_limite, qtd_invalida
+ *   RN2 horário de aula .. R4, R5 (outro prof. sem autorização), R6 (outro prof.
+ *                          com autorização), R7, R25 (próprio ministrante),
+ *                          R26 (aluno pedindo prova), R27*
+ *   RN3 laboratório ...... R8, R9, monitor_sem_biometria, monitor_inexistente,
+ *                          professor_em_laboratorio
+ *   RN4 prioridade ....... R10 (aluno x aluno), R11, R12, R13 (prof x prof),
+ *                          R22-R24*, R28 (prof estudo x aluno), R28_aluno_contra_
+ *                          professor, aluno_prova_contra_aluno, R29-R31
+ *   RN5 cancelamento ..... R18, R19, R20, cancelar_duas_vezes
+ */
+
 
 #include "grade.h"
 #include "notificacao.h"
@@ -509,6 +548,103 @@ static void intervalo_invalido(void)
               && id == 0);
 }
 
+static void capacidade_no_limite(void)
+{
+    int id;
+
+    VERIFICAR("capacidade no limite", res_solicitar("A1", "L105", dataReferencia, "14:00", "16:00", 10,
+              ESTUDO, "", antesDasAulas, &id) == RES_OK && id > 0);
+}
+
+static void qtd_invalida(void)
+{
+    int id;
+
+    VERIFICAR("zero pessoas", res_solicitar("A1", "L201", dataReferencia, "14:00", "16:00", 0,
+              ESTUDO, "", antesDasAulas, &id) == RES_DADOS_INVALIDOS && id == 0);
+}
+
+static void monitor_sem_biometria(void)
+{
+    int id;
+
+    /* A2 existe, mas não tem biometria na L301. */
+    VERIFICAR("monitor sem biometria", res_solicitar("A1", "L301", dataReferencia, "14:00", "16:00", 5,
+              ESTUDO, "A2", antesDasAulas, &id) == RES_LAB_SEM_MONITOR && id == 0);
+}
+
+static void monitor_inexistente(void)
+{
+    int id;
+
+    VERIFICAR("monitor inexistente", res_solicitar("A1", "L301", dataReferencia, "14:00", "16:00", 5,
+              ESTUDO, "X99", antesDasAulas, &id) == RES_LAB_SEM_MONITOR && id == 0);
+}
+
+static void professor_em_laboratorio(void)
+{
+    int id;
+
+    VERIFICAR("professor dispensa monitor", solicitar("P2", "L301", "14:00", "16:00", ESTUDO, &id)
+              == RES_OK && id > 0);
+}
+
+static void aluno_prova_contra_aluno(void)
+{
+    int anterior = prepararEstudo();
+    int id;
+
+    /* Finalidade PROVA não dá prioridade a aluno. */
+    VERIFICAR("aluno pedindo prova", solicitar("A2", "L201", "14:00", "16:00", PROVA, &id)
+              == RES_CONFLITO && chamadasDeEntrega == 0);
+    verificarSituacao("A1", anterior, ATIVA);
+}
+
+static void prova_sem_conflito_nao_avisa(void)
+{
+    int id;
+
+    VERIFICAR("prova em sala livre", solicitar("P1", "L201", "14:00", "16:00", PROVA, &id) == RES_OK
+              && id > 0 && chamadasDeEntrega == 0);
+}
+
+static void cancelar_duas_vezes(void)
+{
+    int id = prepararEstudo();
+
+    VERIFICAR("primeiro cancelamento", res_cancelar(id, "A1") == RES_OK);
+    VERIFICAR("segundo cancelamento", res_cancelar(id, "A1") == RES_NAO_ENCONTRADA);
+    verificarSituacao("A1", id, CANCELADA);
+}
+
+static void busca_com_quadro(void)
+{
+    char livres[MAX_SALAS][TAM];
+    int n;
+
+    VERIFICAR("só L201 tem quadro", res_buscarSalasLivres(dataReferencia, "14:00", "16:00", 5, 1, "P1",
+              livres, &n) == RES_OK && n == 1 && strcmp(livres[0], "L201") == 0);
+}
+
+static void busca_ignora_cancelada(void)
+{
+    char livres[MAX_SALAS][TAM];
+    int id = prepararEstudo();
+    int n;
+
+    VERIFICAR("cancelar", res_cancelar(id, "A1") == RES_OK);
+    VERIFICAR("sala volta à busca", res_buscarSalasLivres(dataReferencia, "14:00", "16:00", 30, 0, "A1",
+              livres, &n) == RES_OK && n == 1 && strcmp(livres[0], "L201") == 0);
+}
+
+static void ids_sequenciais(void)
+{
+    int primeiro = prepararReserva("A1", "12:00", "13:00", ESTUDO);
+    int segundo = prepararReserva("A2", "13:00", "14:00", ESTUDO);
+
+    VERIFICAR("ids sequenciais", primeiro == 1 && segundo == 2);
+}
+
 int main(int argc, char *argv[])
 {
     const CasoUnitario casos[] = {
@@ -518,7 +654,10 @@ int main(int argc, char *argv[])
         CASO(R24), CASO(R24_noventa_minutos), CASO(R25), CASO(R26), CASO(R27),
         CASO(R27_ambas_aulas_autorizam), CASO(R28), CASO(R28_aluno_contra_professor), CASO(R29),
         CASO(R30), CASO(R31), CASO(prazo_na_virada_do_ano), CASO(laboratorio_liberado),
-        CASO(sala_ausente), CASO(intervalo_invalido)
+        CASO(sala_ausente), CASO(intervalo_invalido), CASO(capacidade_no_limite), CASO(qtd_invalida),
+        CASO(monitor_sem_biometria), CASO(monitor_inexistente), CASO(professor_em_laboratorio),
+        CASO(aluno_prova_contra_aluno), CASO(prova_sem_conflito_nao_avisa), CASO(cancelar_duas_vezes),
+        CASO(busca_com_quadro), CASO(busca_ignora_cancelada), CASO(ids_sequenciais)
     };
     return executarCasos(argc, argv, casos, sizeof casos / sizeof casos[0]);
 }

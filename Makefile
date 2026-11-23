@@ -1,7 +1,9 @@
 
-CC ?= gcc
+ifeq ($(origin CC),default)
+CC := gcc
+endif
 CFLAGS ?= -std=c11 -O2 -Wall -Wextra -Wpedantic
-CPPFLAGS += -IAluno -ISala -IGrade -INotificacao -IReserva -IComum
+CPPFLAGS += -IAluno -ISala -IGrade -INotificacao -IReserva -IRegras -IComum
 
 ifeq ($(OS),Windows_NT)
 EXE := .exe
@@ -16,11 +18,12 @@ USUARIO := Aluno/aluno.c
 SALA := Sala/sala.c
 GRADE := Grade/grade.c
 NOTIFICACAO := Notificacao/notificacao.c
+REGRAS := Regras/regras.c
 RESERVA := Reserva/reserva.c
-MODULOS := $(TEMPO) $(USUARIO) $(SALA) $(GRADE) $(NOTIFICACAO) $(RESERVA)
-CABECALHOS := $(wildcard Aluno/*.h Sala/*.h Grade/*.h Notificacao/*.h Reserva/*.h Comum/*.h)
+MODULOS := $(TEMPO) $(USUARIO) $(SALA) $(GRADE) $(NOTIFICACAO) $(REGRAS) $(RESERVA)
+CABECALHOS := $(wildcard Aluno/*.h Sala/*.h Grade/*.h Notificacao/*.h Reserva/*.h Regras/*.h Comum/*.h)
 APP := $(BUILD)/sistema_reserva$(EXE)
-UNITARIOS := $(addprefix $(BUILD)/unit_,$(addsuffix $(EXE),tempo usuario sala grade notificacao reserva))
+UNITARIOS := $(addprefix $(BUILD)/unit_,$(addsuffix $(EXE),tempo usuario sala grade notificacao regras reserva))
 INTEGRACAO := $(BUILD)/integracao$(EXE)
 
 .PHONY: all test test-unit test-integration test-interface
@@ -37,8 +40,10 @@ $(BUILD)/unit_usuario$(EXE): Testes/unit_usuario.c $(USUARIO)
 $(BUILD)/unit_sala$(EXE): Testes/unit_sala.c $(SALA)
 $(BUILD)/unit_grade$(EXE): Testes/unit_grade.c $(GRADE) $(TEMPO)
 $(BUILD)/unit_notificacao$(EXE): Testes/unit_notificacao.c $(NOTIFICACAO)
-$(BUILD)/unit_reserva$(EXE): Testes/unit_reserva.c $(RESERVA) $(TEMPO)
+$(BUILD)/unit_regras$(EXE): Testes/unit_regras.c $(REGRAS)
+$(BUILD)/unit_reserva$(EXE): Testes/unit_reserva.c $(RESERVA) $(REGRAS) $(TEMPO)
 $(INTEGRACAO): Testes/integracao.c $(MODULOS)
+$(INTEGRACAO): Testes/unitario.h
 $(UNITARIOS): Testes/unitario.h
 $(UNITARIOS) $(INTEGRACAO): Testes/verificar.h $(CABECALHOS) | $(BUILD)
 	$(CC) $(CPPFLAGS) $(CFLAGS) $(filter %.c,$^) $(LDFLAGS) $(LDLIBS) -o "$@"
@@ -49,7 +54,7 @@ test-unit: $(UNITARIOS)
 	$(PYTHON) Testes/test_unitarios.py $(UNITARIOS)
 
 test-integration: $(INTEGRACAO)
-	$(INTEGRACAO)
+	$(PYTHON) Testes/test_unitarios.py $(INTEGRACAO)
 
 test-interface: $(APP)
 	$(PYTHON) Testes/test_interface.py $(APP)
