@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block titulo %}Início | Sistema de Reserva de Salas{% endblock %}
+
+{% block conteudo %}
+<section>
+    <h1>Bem-vindo ao sistema de reserva de salas</h1>
+    <p>Interface web do sistema acadêmico de reserva de salas.</p>
+    <div class="painel">
+        <h2>Estado do sistema</h2>
+        <p>Conexão com o núcleo C estabelecida.</p>
+        <p>Salas cadastradas: <strong id="total-salas">{{ total_salas }}</strong></p>
+        {% if total_salas == 0 %}
+            <p>Nenhuma sala cadastrada até o momento.</p>
+        {% endif %}
+    </div>
+    <h2>Módulos em desenvolvimento</h2>
+    <ul>
+        <li>Usuários</li>
+        <li>Salas e biometria</li>
+        <li>Grade e autorizações</li>
+        <li>Reservas</li>
+        <li>Notificações</li>
+    </ul>
+</section>
+{% endblock %}

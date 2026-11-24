@@ -1,0 +1,16 @@
+* { box-sizing: border-box; }
+body { margin: 0; font-family: system-ui, sans-serif; line-height: 1.6; color: #17283b; background: #f5f7fa; }
+.container { width: min(100% - 2rem, 960px); margin-inline: auto; }
+.cabecalho { background: #17365a; color: white; padding: 1rem 0; }
+.cabecalho .container { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1rem; }
+.cabecalho a { color: inherit; }
+.marca { font-weight: 700; text-decoration: none; }
+main { padding-block: 2rem; }
+h1, h2 { line-height: 1.25; }
+a { color: #174e86; }
+.painel { background: white; border: 1px solid #d6dee8; border-radius: .5rem; padding: 1rem 1.25rem; }
+.painel h2 { margin-top: 0; }
+.mensagem { padding: .75rem; margin-bottom: 1rem; border: 1px solid #9aaabd; border-radius: .25rem; }
+.mensagem.success { background: #e8f5e9; }
+.mensagem.error { background: #fce8e6; }
+.rodape { border-top: 1px solid #d6dee8; padding-block: 1rem; color: #43566b; }

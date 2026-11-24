@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block titulo %}Sistema de Reserva de Salas{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <header class="cabecalho">
+        <div class="container">
+            <a class="marca" href="{{ url_for('principal.index') }}">Sistema de Reserva de Salas</a>
+            <nav aria-label="Navegação principal">
+                <a href="{{ url_for('principal.index') }}">Início</a>
+            </nav>
+        </div>
+    </header>
+    <main class="container" id="conteudo">
+        {% for categoria, mensagem in get_flashed_messages(with_categories=true) %}
+            <div class="mensagem {{ categoria }}" role="status">{{ mensagem }}</div>
+        {% endfor %}
+        {% block conteudo %}{% endblock %}
+    </main>
+    <footer class="container rodape">INF1040 — Programação Modular</footer>
+</body>
+</html>
