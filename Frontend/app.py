@@ -9,6 +9,7 @@ from .bridge import BackendBridge
 from .routes.principal import bp as principal_bp
 from .routes.usuarios import bp as usuarios_bp
 from .routes.salas import bp as salas_bp
+from .routes.grade import bp as grade_bp
 
 
 def create_app(config: dict | None = None) -> Flask:
@@ -30,6 +31,7 @@ def create_app(config: dict | None = None) -> Flask:
     app.register_blueprint(principal_bp)
     app.register_blueprint(usuarios_bp)
     app.register_blueprint(salas_bp)
+    app.register_blueprint(grade_bp)
 
     @app.errorhandler(400)
     def requisicao_invalida(erro):

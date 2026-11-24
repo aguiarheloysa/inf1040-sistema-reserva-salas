@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block titulo %}Cadastro de aula | Sistema de Reserva de Salas{% endblock %}
+{% block conteudo %}
+<h1>Cadastrar aula</h1>
+<p>O cadastro corresponde a uma aula semanal. A sala e o professor devem estar cadastrados.</p>
+<form class="painel formulario" method="post" action="{{ url_for('grade.cadastrar') }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <label for="cod_sala">Código da sala</label>
+    <input id="cod_sala" name="cod_sala" type="text" required value="{{ dados.cod_sala }}" placeholder="L201">
+    <label for="disciplina">Disciplina</label>
+    <input id="disciplina" name="disciplina" type="text" required value="{{ dados.disciplina }}">
+    <label for="mat_professor">Matrícula do professor</label>
+    <input id="mat_professor" name="mat_professor" type="text" required value="{{ dados.mat_professor }}" placeholder="P1">
+    <label for="dia_semana">Dia da semana</label>
+    <select id="dia_semana" name="dia_semana" required>
+        {% for valor, rotulo in dias.items() %}
+        <option value="{{ valor }}"{% if dados.dia_semana == valor %} selected{% endif %}>{{ rotulo }}</option>
+        {% endfor %}
+    </select>
+    <label for="inicio">Horário de início</label>
+    <input id="inicio" name="inicio" type="time" required value="{{ dados.inicio }}">
+    <label for="fim">Horário de término</label>
+    <input id="fim" name="fim" type="time" required value="{{ dados.fim }}">
+    <button type="submit">Cadastrar aula</button>
+</form>
+<p><a href="{{ url_for('salas.listar') }}">Listar salas</a> · <a href="{{ url_for('usuarios.consultar') }}">Consultar usuário</a> · <a href="{{ url_for('grade.index') }}">Voltar</a></p>
+{% endblock %}
