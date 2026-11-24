@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block titulo %}Cadastro de sala | Sistema de Reserva de Salas{% endblock %}
+{% block conteudo %}
+<h1>Cadastrar sala</h1>
+<form class="painel formulario" method="post" action="{{ url_for('salas.cadastrar') }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <label for="codigo">Código da sala</label>
+    <input id="codigo" name="codigo" type="text" required value="{{ dados.codigo }}" placeholder="L201">
+    <label for="tipo">Tipo de sala</label>
+    <select id="tipo" name="tipo" required>
+        {% for valor, rotulo in tipos.items() %}
+        <option value="{{ valor }}"{% if dados.tipo == valor %} selected{% endif %}>{{ rotulo }}</option>
+        {% endfor %}
+    </select>
+    <label for="capacidade">Capacidade (pessoas)</label>
+    <input id="capacidade" name="capacidade" type="number" min="1" required value="{{ dados.capacidade }}">
+    <label for="tem_quadro">Possui quadro?</label>
+    <select id="tem_quadro" name="tem_quadro" required>
+        <option value="0"{% if dados.tem_quadro == '0' %} selected{% endif %}>Não</option>
+        <option value="1"{% if dados.tem_quadro == '1' %} selected{% endif %}>Sim</option>
+    </select>
+    <button type="submit">Cadastrar</button>
+</form>
+<p><a href="{{ url_for('salas.listar') }}">Listar salas</a> · <a href="{{ url_for('salas.index') }}">Voltar</a></p>
+{% endblock %}

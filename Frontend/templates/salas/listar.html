@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block titulo %}Listagem de salas | Sistema de Reserva de Salas{% endblock %}
+{% block conteudo %}
+<h1>Listar salas</h1>
+<p>Consulte salas cadastradas por capacidade e presença de quadro. Esta consulta não verifica disponibilidade por horário.</p>
+<form class="painel formulario" method="get" action="{{ url_for('salas.listar') }}">
+    <label for="qtd_pessoas">Quantidade mínima de pessoas</label>
+    <input id="qtd_pessoas" name="qtd_pessoas" type="number" min="1" required value="{{ dados.qtd_pessoas }}">
+    <label for="precisa_quadro">Filtro de quadro</label>
+    <select id="precisa_quadro" name="precisa_quadro">
+        <option value="0"{% if dados.precisa_quadro == '0' %} selected{% endif %}>Todas</option>
+        <option value="1"{% if dados.precisa_quadro == '1' %} selected{% endif %}>Apenas com quadro</option>
+    </select>
+    <button type="submit">Filtrar</button>
+    <a href="{{ url_for('salas.listar') }}">Limpar filtros</a>
+</form>
+{% if salas is not none %}
+<section class="painel resultado">
+    <h2>Salas encontradas: {{ salas|length }}</h2>
+    {% if salas %}
+    <div class="tabela-scroll">
+        <table class="tabela">
+            <thead><tr><th scope="col">Código</th><th scope="col">Tipo</th><th scope="col">Capacidade</th><th scope="col">Quadro</th></tr></thead>
+            <tbody>
+                {% for sala in salas %}
+                <tr><td>{{ sala.codigo }}</td><td>{{ sala.tipo }}</td><td>{{ sala.capacidade }}</td><td>{{ 'Sim' if sala.tem_quadro else 'Não' }}</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p>Nenhuma sala encontrada.</p>
+    {% endif %}
+</section>
+{% endif %}
+<p><a href="{{ url_for('salas.cadastrar') }}">Cadastrar sala</a> · <a href="{{ url_for('salas.index') }}">Voltar</a></p>
+{% endblock %}

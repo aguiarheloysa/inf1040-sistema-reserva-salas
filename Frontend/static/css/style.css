@@ -14,3 +14,17 @@ a { color: #174e86; }
 .mensagem.success { background: #e8f5e9; }
 .mensagem.error { background: #fce8e6; }
 .rodape { border-top: 1px solid #d6dee8; padding-block: 1rem; color: #43566b; }
+
+.cabecalho nav { display: flex; flex-wrap: wrap; gap: 1rem; }
+.formulario { display: grid; gap: .5rem; max-width: 36rem; }
+.formulario label { font-weight: 600; }
+.formulario input, .formulario select { font: inherit; padding: .55rem; width: 100%; border: 1px solid #9aaabd; border-radius: .25rem; }
+.formulario button { font: inherit; cursor: pointer; justify-self: start; margin-top: .75rem; padding: .55rem 1rem; background: #17365a; color: white; border: 0; border-radius: .25rem; }
+.resultado { margin-top: 1rem; overflow-wrap: anywhere; }
+.resultado dt { font-weight: 600; }
+.resultado dd { margin: 0 0 .75rem; }
+
+.tabela-scroll { overflow-x: auto; }
+.tabela { width: 100%; border-collapse: collapse; text-align: left; }
+.tabela th, .tabela td { padding: .6rem; border-bottom: 1px solid #d6dee8; }
+.tabela th { background: #f5f7fa; }

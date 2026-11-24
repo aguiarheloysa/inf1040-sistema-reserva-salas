@@ -15,10 +15,12 @@
         {% endif %}
     </div>
     <h2>Módulos disponíveis</h2>
-    <ul><li><a href="{{ url_for('usuarios.index') }}">Usuários</a></li></ul>
+    <ul>
+        <li><a href="{{ url_for('usuarios.index') }}">Usuários</a></li>
+        <li><a href="{{ url_for('salas.index') }}">Salas e biometria</a></li>
+    </ul>
     <h2>Módulos em desenvolvimento</h2>
     <ul>
-        <li>Salas e biometria</li>
         <li>Grade e autorizações</li>
         <li>Reservas</li>
         <li>Notificações</li>

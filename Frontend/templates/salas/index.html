@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block titulo %}Salas | Sistema de Reserva de Salas{% endblock %}
+{% block conteudo %}
+<h1>Salas e biometria</h1>
+<div class="painel">
+    <p>Cadastre salas comuns e laboratórios, consulte capacidade e registre monitores.</p>
+    <p><a href="{{ url_for('salas.cadastrar') }}">Cadastrar sala</a></p>
+    <p><a href="{{ url_for('salas.listar') }}">Listar salas</a></p>
+    <p><a href="{{ url_for('salas.biometria') }}">Registrar biometria</a></p>
+</div>
+{% endblock %}

@@ -263,26 +263,44 @@ class BackendBridge:
         rc = self._lib.sala_cadastrar(_b(codigo), _int_c(tipo), _int_c(capacidade), _int_c(tem_quadro))
         return self._checar(rc, MENSAGENS_SALA)
 
-    def listar_todas_salas(self) -> list[dict[str, Any]]:
+    def _codigos_salas(self, qtd_pessoas: int, precisa_quadro: int) -> list[str]:
         buffer = ((ctypes.c_char * TAM) * MAX_SALAS)()
         n = ctypes.c_int(0)
-        rc = self._lib.sala_listarPorCapacidade(1, 0, buffer, ctypes.byref(n))
+        rc = self._lib.sala_listarPorCapacidade(qtd_pessoas, precisa_quadro, buffer, ctypes.byref(n))
         if rc == 5:  # SALA_NENHUMA
             return []
         self._checar(rc, MENSAGENS_SALA)
+        return [buffer[i].value.decode("utf-8") for i in range(n.value)]
 
-        salas = []
-        for i in range(n.value):
-            cod = buffer[i].value.decode("utf-8")
-            cap, tipo = ctypes.c_int(), ctypes.c_int()
-            self._checar(self._lib.sala_obterCapacidade(_b(cod), ctypes.byref(cap)), MENSAGENS_SALA)
-            self._checar(self._lib.sala_obterTipo(_b(cod), ctypes.byref(tipo)), MENSAGENS_SALA)
-            salas.append({
-                "codigo": cod,
-                "capacidade": cap.value,
-                "tipo": "Laboratório" if tipo.value == 1 else "Comum",
-            })
-        return salas
+    def _detalhes_sala(self, cod: str) -> dict[str, Any]:
+        cap, tipo = ctypes.c_int(), ctypes.c_int()
+        self._checar(self._lib.sala_obterCapacidade(_b(cod), ctypes.byref(cap)), MENSAGENS_SALA)
+        self._checar(self._lib.sala_obterTipo(_b(cod), ctypes.byref(tipo)), MENSAGENS_SALA)
+        return {
+            "codigo": cod,
+            "capacidade": cap.value,
+            "tipo": "Laboratório" if tipo.value == 1 else "Comum",
+        }
+
+    def listar_todas_salas(self) -> list[dict[str, Any]]:
+        # Mantém a interface pública original (inclusive as chaves do dicionário).
+        return [self._detalhes_sala(cod) for cod in self._codigos_salas(1, 0)]
+
+    def listar_salas(self, qtd_pessoas: int = 1, precisa_quadro: int = 0) -> list[dict[str, Any]]:
+        """Consulta salas por capacidade/quadro usando exclusivamente a API C.
+
+        A API de listagem não distingue quantidade inválida de lista vazia e
+        trata qualquer valor não zero como verdadeiro; validamos o contrato
+        de entrada antes da chamada. Não filtramos capacidade no Python.
+        """
+        pessoas, quadro = _int_c(qtd_pessoas), _int_c(precisa_quadro)
+        if pessoas <= 0 or quadro not in (0, 1):
+            raise BackendError(6, "Informe uma quantidade positiva e um filtro de quadro válido.")
+        codigos = self._codigos_salas(pessoas, quadro)
+        # Não existe sala_obterQuadro. Consultar a lista com quadro é suficiente.
+        com_quadro = set(self._codigos_salas(1, 1)) if codigos else set()
+        return [{**self._detalhes_sala(cod), "tem_quadro": cod in com_quadro}
+                for cod in codigos]
 
     def registrar_biometria(self, cod_sala: str, mat_monitor: str) -> str:
         if not self._lib.usu_existe(_b(mat_monitor)):
