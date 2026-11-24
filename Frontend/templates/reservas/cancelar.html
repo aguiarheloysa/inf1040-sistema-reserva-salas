@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block titulo %}Cancelar reserva | Sistema de Reserva de Salas{% endblock %}
+{% block conteudo %}
+<h1>Cancelar reserva</h1>
+<p>Confirme o identificador e a matrícula do titular. O núcleo C decide se o cancelamento é permitido. Esta operação não pode ser desfeita.</p>
+<form class="painel formulario" method="post" action="{{ url_for('reservas.cancelar') }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <label for="id_reserva">ID da reserva</label>
+    <input id="id_reserva" name="id_reserva" type="number" min="1" required value="{{ dados.id_reserva }}">
+    <label for="matricula">Matrícula do titular</label>
+    <input id="matricula" name="matricula" maxlength="19" required value="{{ dados.matricula }}">
+    <button type="submit">Confirmar cancelamento</button>
+</form>
+<p><a href="{{ url_for('reservas.listar', matricula=dados.matricula) if dados.matricula else url_for('reservas.listar') }}">Voltar ao histórico</a> · <a href="{{ url_for('reservas.index') }}">Menu de reservas</a></p>
+{% endblock %}

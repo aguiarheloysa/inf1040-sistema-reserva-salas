@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block titulo %}Histórico de reservas | Sistema de Reserva de Salas{% endblock %}
+{% block conteudo %}
+<h1>Consultar reservas</h1>
+<form class="painel formulario" method="get" action="{{ url_for('reservas.listar') }}">
+    <label for="matricula">Matrícula</label>
+    <input id="matricula" name="matricula" required maxlength="19" value="{{ matricula }}">
+    <button type="submit">Consultar</button>
+</form>
+{% if reservas is not none %}
+<section class="painel resultado">
+    <h2>Reservas encontradas: {{ reservas|length }}</h2>
+    {% if reservas %}
+    <div class="tabela-scroll"><table class="tabela">
+        <thead><tr><th scope="col">ID</th><th scope="col">Sala</th><th scope="col">Data</th><th scope="col">Início</th><th scope="col">Fim</th><th scope="col">Pessoas</th><th scope="col">Finalidade</th><th scope="col">Situação</th><th scope="col">Ação</th></tr></thead>
+        <tbody>
+            {% for r in reservas %}
+            <tr><td>{{ r.id }}</td><td>{{ r.cod_sala }}</td><td>{{ r.data }}</td><td>{{ r.inicio }}</td><td>{{ r.fim }}</td><td>{{ r.qtd_pessoas }}</td><td>{{ r.finalidade }}</td><td>{{ r.situacao }}</td><td>{% if r.situacao == 'ATIVA' %}<a href="{{ url_for('reservas.cancelar', id_reserva=r.id, matricula=r.matricula) }}">Cancelar</a>{% else %}—{% endif %}</td></tr>
+            {% endfor %}
+        </tbody>
+    </table></div>
+    {% else %}<p>Nenhuma reserva para a matrícula informada.</p>{% endif %}
+</section>
+{% endif %}
+<p><a href="{{ url_for('reservas.solicitar') }}">Solicitar reserva</a> · <a href="{{ url_for('reservas.index') }}">Voltar</a></p>
+{% endblock %}

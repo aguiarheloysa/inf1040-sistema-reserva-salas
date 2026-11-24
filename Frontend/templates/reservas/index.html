@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block titulo %}Reservas | Sistema de Reserva de Salas{% endblock %}
+{% block conteudo %}
+<h1>Reservas</h1>
+<div class="painel">
+    <p>Consulte a disponibilidade, solicite uma sala, acompanhe seu histórico ou cancele uma reserva.</p>
+    <p><a href="{{ url_for('reservas.buscar') }}">Buscar salas livres</a></p>
+    <p><a href="{{ url_for('reservas.solicitar') }}">Solicitar reserva</a></p>
+    <p><a href="{{ url_for('reservas.listar') }}">Consultar minhas reservas</a></p>
+    <p><a href="{{ url_for('reservas.cancelar') }}">Cancelar reserva</a></p>
+</div>
+<p>A identificação pela matrícula é uma simulação acadêmica, sem autenticação. Use dados fictícios.</p>
+{% endblock %}
