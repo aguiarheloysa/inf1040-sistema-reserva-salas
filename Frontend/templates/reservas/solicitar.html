@@ -27,6 +27,6 @@
     <input id="mat_monitor" name="mat_monitor" maxlength="19" value="{{ dados.mat_monitor }}">
     <button type="submit">Confirmar solicitação</button>
 </form>
-<p>O aviso de substituição de uma reserva é simulado no terminal nesta etapa; não é enviado e-mail real. O horário atual é obtido do servidor.</p>
+<p>Os avisos de substituição são enviados pelo <a href="{{ url_for('notificacoes.index') }}">canal de notificações configurado</a>. O horário atual é obtido do servidor.</p>
 <p><a href="{{ url_for('reservas.buscar') }}">Buscar salas livres</a> · <a href="{{ url_for('grade.autorizar') }}">Autorizar prova</a> · <a href="{{ url_for('salas.biometria') }}">Registrar biometria</a> · <a href="{{ url_for('reservas.index') }}">Voltar</a></p>
 {% endblock %}

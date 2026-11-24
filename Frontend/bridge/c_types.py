@@ -38,3 +38,13 @@ class ReservaC(ctypes.Structure):
         ("finalidade", ctypes.c_int),
         ("situacao", ctypes.c_int),
     ]
+
+
+class NotEntregaC(ctypes.Structure):
+    """NotEntrega de Notificacao/notificacao.h (ponteiros somente durante a chamada)."""
+    _fields_ = [("email", ctypes.c_char_p), ("mensagem", ctypes.c_char_p)]
+
+
+NotCanalEntregaC = ctypes.CFUNCTYPE(
+    ctypes.c_int, ctypes.POINTER(NotEntregaC), ctypes.c_int
+)

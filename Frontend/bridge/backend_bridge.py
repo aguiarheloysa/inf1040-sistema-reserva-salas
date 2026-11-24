@@ -1,4 +1,7 @@
 import ctypes
+import logging
+from collections.abc import Callable
+from contextlib import contextmanager
 import os
 import sys
 from datetime import datetime
@@ -14,6 +17,7 @@ from .c_types import (
     TAM,
     TAM_EMAIL,
     DataHora,
+    NotCanalEntregaC,
     ReservaC,
 )
 
@@ -109,7 +113,8 @@ def caminho_biblioteca() -> Path:
 class BackendBridge:
     """Adaptador Python puro para a biblioteca compartilhada compilada em C."""
 
-    def __init__(self, dll_path: Path | None = None):
+    def __init__(self, dll_path: Path | None = None,
+                 canal_entrega: Callable[[list[tuple[str, str]]], bool] | None = None):
         if dll_path is None:
             dll_path = caminho_biblioteca()
         dll_path = Path(dll_path).resolve()
@@ -120,6 +125,7 @@ class BackendBridge:
 
         self._lib = ctypes.CDLL(str(dll_path))
         self._configurar_assinaturas()
+        self._canal_entrega = canal_entrega
 
     def _checar(self, rc: int, tabela: dict[int, str], msg_sucesso: str | None = None) -> str:
         """Lança BackendError se rc != 0; caso contrário devolve a mensagem de sucesso."""
@@ -191,6 +197,10 @@ class BackendBridge:
             ctypes.c_char_p,
         ]
         lib.grade_registrarAutorizacao.restype = ctypes.c_int
+
+        # Notificação (Notificacao/notificacao.h): NULL restaura o canal padrão.
+        lib.not_definirCanalEntrega.argtypes = [ctypes.c_void_p]
+        lib.not_definirCanalEntrega.restype = None
 
         # Reserva (Reserva/reserva.h)
         lib.res_buscarSalasLivres.argtypes = [
@@ -359,6 +369,41 @@ class BackendBridge:
         self._checar(rc, MENSAGENS_RESERVA)
         return [buffer[i].value.decode("utf-8") for i in range(n.value)]
 
+    @contextmanager
+    def _canal_notificacao(self):
+        """Instala o callback só durante a operação C síncrona.
+
+        O chamador deve serializar as operações que usam a mesma biblioteca.
+        O callback não pode chamar o núcleo novamente; seus ponteiros são
+        válidos apenas durante a chamada. True significa aceite pelo canal.
+        """
+        if self._canal_entrega is None:
+            yield
+            return
+
+        @NotCanalEntregaC
+        def callback(entregas, quantidade):
+            try:
+                if not entregas or not 0 < quantidade <= MAX_RESERVAS:
+                    return 0
+                lote = [(entregas[i].email.decode("utf-8"),
+                         entregas[i].mensagem.decode("utf-8"))
+                        for i in range(quantidade)]
+                return int(bool(self._canal_entrega(lote)))
+            except BaseException as erro:
+                # Nenhuma exceção Python pode atravessar a fronteira do callback C.
+                # Não expõe mensagens SMTP, endereços ou credenciais no log.
+                logging.getLogger(__name__).warning(
+                    "Falha no canal de notificação (%s).", type(erro).__name__)
+                return 0
+
+        self._lib.not_definirCanalEntrega(ctypes.cast(callback, ctypes.c_void_p))
+        try:
+            yield
+        finally:
+            # O callback permanece vivo até ser retirado do núcleo.
+            self._lib.not_definirCanalEntrega(None)
+
     def solicitar_reserva(
         self,
         matricula: str,
@@ -386,18 +431,19 @@ class BackendBridge:
             self._checar(12, MENSAGENS_RESERVA)
         id_reserva = ctypes.c_int(0)
 
-        rc = self._lib.res_solicitar(
-            _b(matricula),
-            _b(cod_sala),
-            _b(normalizar_data(data)),
-            _b(inicio),
-            _b(fim),
-            _int_c(qtd_pessoas),
-            _int_c(finalidade),
-            _b(mat_monitor),
-            agora_c,
-            ctypes.byref(id_reserva),
-        )
+        with self._canal_notificacao():
+            rc = self._lib.res_solicitar(
+                _b(matricula),
+                _b(cod_sala),
+                _b(normalizar_data(data)),
+                _b(inicio),
+                _b(fim),
+                _int_c(qtd_pessoas),
+                _int_c(finalidade),
+                _b(mat_monitor),
+                agora_c,
+                ctypes.byref(id_reserva),
+            )
         self._checar(rc, MENSAGENS_RESERVA)
         return id_reserva.value
 
