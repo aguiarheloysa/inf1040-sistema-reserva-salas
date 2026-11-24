@@ -53,7 +53,7 @@ def test_menu_e_modo_simulado(ambiente, monkeypatch):
     client = app.test_client()
     assert '/notificacoes/' in client.get('/').get_data(as_text=True)
     r = client.get('/notificacoes/')
-    assert r.status_code == 200 and 'Modo simulado' in r.get_data(as_text=True)
+    assert r.status_code == 200 and 'Nenhum e-mail real é enviado.' in r.get_data(as_text=True)
     assert client.post('/notificacoes/').status_code == 405
 
 
@@ -64,7 +64,7 @@ def test_modo_invalido(ambiente):
 
 def test_modo_smtp(ambiente):
     app = create_app({**ambiente, 'NOTIFICACAO_MODO':'smtp'})
-    assert 'Modo SMTP' in app.test_client().get('/notificacoes/').get_data(as_text=True)
+    assert 'Avisos por e-mail habilitados.' in app.test_client().get('/notificacoes/').get_data(as_text=True)
 
 
 @pytest.mark.parametrize('falha', [False, True])

@@ -2,7 +2,7 @@
 {% block titulo %}Registro de biometria | Sistema de Reserva de Salas{% endblock %}
 {% block conteudo %}
 <h1>Registrar biometria</h1>
-<p>Associe a matrícula de um usuário cadastrado ao registro de biometria de um laboratório. O sistema apenas registra a associação; não captura impressões digitais.</p>
+<p>Informe o laboratório e a matrícula do monitor. O registro é simulado, sem leitura de impressão digital.</p>
 <form class="painel formulario" method="post" action="{{ url_for('salas.biometria') }}">
     <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
     <label for="codigo">Código do laboratório</label>

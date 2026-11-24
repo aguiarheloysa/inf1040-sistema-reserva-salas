@@ -2,15 +2,15 @@
 {% block titulo %}Autorização de prova | Sistema de Reserva de Salas{% endblock %}
 {% block conteudo %}
 <h1>Autorizar prova</h1>
-<p>O ministrante da aula autoriza um professor cadastrado para uma data e um horário específicos. Informe o primeiro minuto de sobreposição da prova com a aula.</p>
-<p>Esta operação registra uma autorização; ela não cria uma reserva. Se a prova sobrepuser mais de uma aula, cada aula de outro ministrante exige a autorização correspondente.</p>
+<p>O professor responsável pela aula pode autorizar outro professor a realizar uma prova naquele horário. Informe a data e o horário em que a prova começa a coincidir com a aula.</p>
+<p>Após a autorização, solicite a reserva. Se a prova coincidir com aulas de outros professores, obtenha a autorização de cada um para o horário correspondente.</p>
 <form class="painel formulario" method="post" action="{{ url_for('grade.autorizar') }}">
     <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
     <label for="cod_sala">Código da sala</label>
     <input id="cod_sala" name="cod_sala" type="text" required value="{{ dados.cod_sala }}" placeholder="L201">
     <label for="data">Data da prova</label>
     <input id="data" name="data" type="date" required value="{{ dados.data }}">
-    <label for="hora">Início da sobreposição com a aula</label>
+    <label for="hora">Horário em que a prova começa a coincidir com a aula</label>
     <input id="hora" name="hora" type="time" required value="{{ dados.hora }}">
     <label for="mat_ministrante">Matrícula do ministrante</label>
     <input id="mat_ministrante" name="mat_ministrante" type="text" required value="{{ dados.mat_ministrante }}" placeholder="P1">

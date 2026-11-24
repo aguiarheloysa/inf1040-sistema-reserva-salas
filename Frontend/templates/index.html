@@ -4,23 +4,21 @@
 
 {% block conteudo %}
 <section>
-    <h1>Bem-vindo ao sistema de reserva de salas</h1>
-    <p>Interface web do sistema acadêmico de reserva de salas.</p>
+    <h1>Reserva de salas</h1>
     <div class="painel">
-        <h2>Estado do sistema</h2>
-        <p>Conexão com o núcleo C estabelecida.</p>
+        <h2>Salas</h2>
         <p>Salas cadastradas: <strong id="total-salas">{{ total_salas }}</strong></p>
         {% if total_salas == 0 %}
             <p>Nenhuma sala cadastrada até o momento.</p>
         {% endif %}
     </div>
-    <h2>Módulos disponíveis</h2>
+    <h2>Serviços</h2>
     <ul>
-        <li><a href="{{ url_for('usuarios.index') }}">Usuários</a></li>
-        <li><a href="{{ url_for('salas.index') }}">Salas e biometria</a></li>
-        <li><a href="{{ url_for('grade.index') }}">Grade e autorizações</a></li>
-        <li><a href="{{ url_for('reservas.index') }}">Reservas</a></li>
-        <li><a href="{{ url_for('notificacoes.index') }}">Notificações</a></li>
+        <li><a href="{{ url_for('usuarios.index') }}">Cadastrar e consultar usuários</a></li>
+        <li><a href="{{ url_for('salas.index') }}">Consultar e cadastrar salas</a></li>
+        <li><a href="{{ url_for('grade.index') }}">Cadastrar aulas e autorizar provas</a></li>
+        <li><a href="{{ url_for('reservas.index') }}">Buscar, solicitar e consultar reservas</a></li>
+        <li><a href="{{ url_for('notificacoes.index') }}">Avisos de cancelamento</a></li>
     </ul>
 </section>
 {% endblock %}

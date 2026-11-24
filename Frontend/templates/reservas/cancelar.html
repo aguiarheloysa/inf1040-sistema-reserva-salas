@@ -2,7 +2,7 @@
 {% block titulo %}Cancelar reserva | Sistema de Reserva de Salas{% endblock %}
 {% block conteudo %}
 <h1>Cancelar reserva</h1>
-<p>Confirme o identificador e a matrícula do titular. O núcleo C decide se o cancelamento é permitido. Esta operação não pode ser desfeita.</p>
+<p>Somente o titular pode cancelar a reserva. Confira o número da reserva e a matrícula antes de confirmar. O cancelamento não pode ser desfeito.</p>
 <form class="painel formulario" method="post" action="{{ url_for('reservas.cancelar') }}">
     <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
     <label for="id_reserva">ID da reserva</label>

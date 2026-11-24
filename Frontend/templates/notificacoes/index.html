@@ -3,16 +3,16 @@
 {% block conteudo %}
 <h1>Notificações</h1>
 <div class="painel">
-    <h2>Canal de entrega</h2>
+    <h2>Avisos de cancelamento</h2>
     {% if modo == 'smtp' %}
-    <p>Modo SMTP — envio de e-mail real habilitado na configuração do servidor.</p>
-    <p>O aceite pelo servidor SMTP não garante que a mensagem chegue à caixa de entrada.</p>
+    <p>Avisos por e-mail habilitados.</p>
+    <p>Confira também a caixa de spam e o histórico de reservas.</p>
     {% else %}
-    <p>Modo simulado — avisos exibidos no terminal do servidor. Nenhum e-mail real é enviado.</p>
+    <p>Avisos de teste. Nenhum e-mail real é enviado.</p>
     {% endif %}
-    <p>O núcleo envia automaticamente avisos aos titulares quando uma prova pode substituir reservas de alunos. As regras de prioridade e antecedência são avaliadas no C.</p>
-    <p>Se o canal informar falha, o núcleo recusa a substituição e mantém as reservas anteriores ativas.</p>
-    <p>Não há envio manual nem caixa de mensagens: consulte a situação de suas reservas no histórico.</p>
+    <p>Quando uma prova tem prioridade sobre uma reserva de aluno, é emitido um aviso de cancelamento ao titular.</p>
+    <p>Se não for possível enviar o aviso, a reserva anterior permanece ativa.</p>
+    <p>Consulte o histórico para acompanhar a situação das reservas.</p>
     <p><a href="{{ url_for('reservas.listar') }}">Consultar histórico de reservas</a> · <a href="{{ url_for('reservas.solicitar') }}">Solicitar reserva</a></p>
 </div>
 {% endblock %}

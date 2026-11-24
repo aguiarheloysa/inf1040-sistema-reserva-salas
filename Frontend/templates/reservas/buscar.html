@@ -2,7 +2,7 @@
 {% block titulo %}Buscar salas livres | Sistema de Reserva de Salas{% endblock %}
 {% block conteudo %}
 <h1>Buscar salas livres</h1>
-<p>A busca apresenta salas livres segundo o núcleo C. A disponibilidade pode mudar até a confirmação da reserva.</p>
+<p>Informe a data, o horário e a quantidade de pessoas. A disponibilidade pode mudar até a confirmação da reserva.</p>
 <form class="painel formulario" method="get" action="{{ url_for('reservas.buscar') }}">
     <label for="matricula">Matrícula</label>
     <input id="matricula" name="matricula" required maxlength="19" value="{{ dados.matricula }}">
@@ -33,6 +33,6 @@
     {% else %}<p>Nenhuma sala disponível.</p>{% endif %}
 </section>
 {% endif %}
-<p>A busca não inclui salas ocupadas por aulas ou reservas, nem laboratórios para alunos. Se você pretende usar autorização de prova, prioridade de prova ou monitor com biometria, use a solicitação direta; o núcleo decidirá se o pedido é permitido.</p>
+<p>A busca não inclui salas ocupadas por aulas ou reservas, nem laboratórios para alunos. Para solicitar uma prova em horário ocupado ou um laboratório com monitor, utilize a solicitação direta.</p>
 <p><a href="{{ url_for('reservas.solicitar', matricula=dados.matricula, data=dados.data, inicio=dados.inicio, fim=dados.fim, qtd_pessoas=dados.qtd_pessoas) }}">Solicitar diretamente</a> · <a href="{{ url_for('reservas.index') }}">Voltar</a></p>
 {% endblock %}

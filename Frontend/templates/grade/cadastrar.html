@@ -2,7 +2,7 @@
 {% block titulo %}Cadastro de aula | Sistema de Reserva de Salas{% endblock %}
 {% block conteudo %}
 <h1>Cadastrar aula</h1>
-<p>O cadastro corresponde a uma aula semanal. A sala e o professor devem estar cadastrados.</p>
+<p>A aula será repetida semanalmente no dia e horário informados. A sala e o professor devem estar cadastrados.</p>
 <form class="painel formulario" method="post" action="{{ url_for('grade.cadastrar') }}">
     <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
     <label for="cod_sala">Código da sala</label>

@@ -29,6 +29,9 @@ def test_pagina_inicial(client):
     assert resposta.mimetype == "text/html"
     assert "Sistema de Reserva de Salas" in resposta.get_data(as_text=True)
     assert 'id="total-salas">0</strong>' in resposta.get_data(as_text=True)
+    assert "Serviços" in resposta.get_data(as_text=True)
+    assert "Conexão com o núcleo C" not in resposta.get_data(as_text=True)
+    assert "Módulos disponíveis" not in resposta.get_data(as_text=True)
 
 
 def test_css(client):
