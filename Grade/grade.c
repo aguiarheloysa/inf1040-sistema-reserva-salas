@@ -3,6 +3,7 @@
 
 #include <string.h>
 
+#include "matricula.h"
 #include "tempo.h"
 
 #define MAX_AULAS 500
@@ -75,7 +76,7 @@ int grade_cadastrarAula(char *codSala, char *disciplina, char *matProfessor,
     if (diaSemana < 1 || diaSemana > 7 || !tempo_intervalo(ini, fim, &inicio, &termino))
         return GRADE_HORARIO_INVALIDO;
     if (!campoValido(codSala, TAM) || !campoValido(disciplina, TAM_DISCIPLINA)
-            || !campoValido(matProfessor, TAM))
+            || !matricula_valida(matProfessor))
         return GRADE_DADOS_INVALIDOS;
     if (buscarAula(codSala, diaSemana, inicio, termino))
         return GRADE_CONFLITO;
@@ -121,7 +122,7 @@ int grade_registrarAutorizacao(char *codSala, const char *d, const char *ini,
         return GRADE_SEM_AULA;
     if (!matMinistrante || strcmp(aula->matProfessor, matMinistrante) != 0)
         return GRADE_NAO_MINISTRANTE;
-    if (!campoValido(matSolicitante, TAM))
+    if (!matricula_valida(matSolicitante))
         return GRADE_DADOS_INVALIDOS;
     if (temAutorizacao(aula, dia, inicio, matSolicitante))
         return GRADE_OK;

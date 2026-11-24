@@ -1,20 +1,30 @@
-"""Executa cada caso unitário em um novo processo."""
-
 from pathlib import Path
 import subprocess
 import sys
 
 
+def executar(executavel, argumento, *, capturar=False):
+    try:
+        return subprocess.run(
+            [executavel, argumento], check=True, capture_output=capturar, text=capturar, timeout=10
+        )
+    except OSError as erro:
+        if getattr(erro, "winerror", None) == 4551:
+            sys.exit(
+                f"O Controle de Aplicativo do Windows bloqueou {executavel.name} (WinError 4551).\n"
+                "No Ubuntu via WSL, execute make test-unit na raiz do projeto."
+            )
+        raise
+
+
 def executar_suite(caminho):
     executavel = Path(caminho).resolve()
-    nomes = subprocess.run(
-        [executavel, "--listar"], check=True, capture_output=True, text=True, timeout=10
-    ).stdout.splitlines()
+    nomes = executar(executavel, "--listar", capturar=True).stdout.splitlines()
     if not nomes or len(set(nomes)) != len(nomes):
         raise ValueError(f"Lista de casos inválida em {executavel.name}")
 
     for nome in nomes:
-        subprocess.run([executavel, nome], check=True, timeout=10)
+        executar(executavel, nome)
     print(f"{executavel.stem}: {len(nomes)} casos OK", flush=True)
     return len(nomes)
 

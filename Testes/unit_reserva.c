@@ -25,9 +25,9 @@ int usu_obterTipo(char *matricula, TipoUsuario *tipo)
 {
     if (!matricula)
         return USU_NAO_ENCONTRADO;
-    if (strcmp(matricula, "A1") == 0 || strcmp(matricula, "A2") == 0 || strcmp(matricula, "M1") == 0)
+    if (strcmp(matricula, "1001") == 0 || strcmp(matricula, "1002") == 0 || strcmp(matricula, "3001") == 0)
         *tipo = ALUNO;
-    else if (strcmp(matricula, "P1") == 0 || strcmp(matricula, "P2") == 0)
+    else if (strcmp(matricula, "2001") == 0 || strcmp(matricula, "2002") == 0)
         *tipo = PROFESSOR;
     else
         return USU_NAO_ENCONTRADO;
@@ -81,7 +81,7 @@ int sala_listarPorCapacidade(int qtd, int quadro, char lista[][TAM], int *n)
 
 int sala_temMonitorComBiometria(char *codigo, char *matMonitor)
 {
-    return strcmp(codigo, "L301") == 0 && strcmp(matMonitor, "M1") == 0;
+    return strcmp(codigo, "L301") == 0 && strcmp(matMonitor, "3001") == 0;
 }
 
 int grade_temAula(char *sala, const char *d, const char *ini, const char *fim, char *matMinistrante)
@@ -94,7 +94,7 @@ int grade_temAula(char *sala, const char *d, const char *ini, const char *fim, c
 int grade_permiteProva(char *sala, const char *d, const char *ini, const char *fim, char *solicitante)
 {
     return !grade_temAula(sala, d, ini, fim, NULL)
-        || strcmp(solicitante, "P1") == 0 || autorizacao;
+        || strcmp(solicitante, "2001") == 0 || autorizacao;
 }
 
 int not_avisarCancelamentos(Reserva *const anteriores[], int quantidade)
@@ -127,7 +127,7 @@ static int prepararReserva(char *matricula, const char *inicio, const char *fim,
 
 static int prepararEstudo(void)
 {
-    return prepararReserva("A1", "14:00", "16:00", ESTUDO);
+    return prepararReserva("1001", "14:00", "16:00", ESTUDO);
 }
 
 static void verificarSituacao(char *matricula, int id, Situacao situacao)
@@ -144,14 +144,14 @@ static void verificarSemProva(void)
     Reserva lista[MAX_RESERVAS];
     int n;
 
-    VERIFICAR("sem prova registrada", res_listarPorUsuario("P1", lista, &n) == RES_NENHUMA_RESERVA && n == 0);
+    VERIFICAR("sem prova registrada", res_listarPorUsuario("2001", lista, &n) == RES_NENHUMA_RESERVA && n == 0);
 }
 
 static int solicitarProvaNoHorario(const char *agora, const char *inicio, const char *fim, int *id)
 {
     DataHora pedido = antesDasAulas;
     strcpy(pedido.hora, agora);
-    return res_solicitar("P1", "L201", dataReferencia, inicio, fim, 5, PROVA, "", pedido, id);
+    return res_solicitar("2001", "L201", dataReferencia, inicio, fim, 5, PROVA, "", pedido, id);
 }
 
 static void verificarAceiteComPrazo(const char *agora)
@@ -162,9 +162,9 @@ static void verificarAceiteComPrazo(const char *agora)
     VERIFICAR("prova com prazo", solicitarProvaNoHorario(agora, "14:00", "16:00", &id) == RES_OK
               && id > 0 && id != anterior);
     VERIFICAR("aviso ao titular", chamadasDeEntrega == 1 && avisos == 1
-              && strcmp(destinatarios[0], "A1") == 0);
-    verificarSituacao("A1", anterior, CANCELADA);
-    verificarSituacao("P1", id, ATIVA);
+              && strcmp(destinatarios[0], "1001") == 0);
+    verificarSituacao("1001", anterior, CANCELADA);
+    verificarSituacao("2001", id, ATIVA);
 }
 
 static void verificarRecusaPorPrazo(const char *agora)
@@ -175,7 +175,7 @@ static void verificarRecusaPorPrazo(const char *agora)
     VERIFICAR("prazo insuficiente", solicitarProvaNoHorario(agora, "14:00", "16:00", &id)
               == RES_ANTECEDENCIA_INSUFICIENTE && id == 0);
     VERIFICAR("nenhuma tentativa de aviso", chamadasDeEntrega == 0);
-    verificarSituacao("A1", anterior, ATIVA);
+    verificarSituacao("1001", anterior, ATIVA);
     verificarSemProva();
 }
 
@@ -183,22 +183,22 @@ static void R1(void)
 {
     int id;
 
-    VERIFICAR("R1", solicitar("A1", "L201", "14:00", "16:00", ESTUDO, &id) == RES_OK && id > 0);
-    verificarSituacao("A1", id, ATIVA);
+    VERIFICAR("R1", solicitar("1001", "L201", "14:00", "16:00", ESTUDO, &id) == RES_OK && id > 0);
+    verificarSituacao("1001", id, ATIVA);
 }
 
 static void R2(void)
 {
     int id;
 
-    VERIFICAR("R2", solicitar("X99", "L201", "14:00", "16:00", ESTUDO, &id) == RES_USUARIO_INEXISTENTE);
+    VERIFICAR("R2", solicitar("9999", "L201", "14:00", "16:00", ESTUDO, &id) == RES_USUARIO_INEXISTENTE);
 }
 
 static void R3(void)
 {
     int id;
 
-    VERIFICAR("R3", res_solicitar("A1", "L105", dataReferencia, "14:00", "16:00", 20, ESTUDO,
+    VERIFICAR("R3", res_solicitar("1001", "L105", dataReferencia, "14:00", "16:00", 20, ESTUDO,
               "", antesDasAulas, &id) == RES_CAPACIDADE_EXCEDIDA);
 }
 
@@ -206,14 +206,14 @@ static void R4(void)
 {
     int id;
 
-    VERIFICAR("R4", solicitar("A1", "L201", "09:00", "10:00", ESTUDO, &id) == RES_HORARIO_AULA);
+    VERIFICAR("R4", solicitar("1001", "L201", "09:00", "10:00", ESTUDO, &id) == RES_HORARIO_AULA);
 }
 
 static void R5(void)
 {
     int id;
 
-    VERIFICAR("R5", solicitar("P2", "L201", "09:00", "10:00", PROVA, &id) == RES_HORARIO_AULA);
+    VERIFICAR("R5", solicitar("2002", "L201", "09:00", "10:00", PROVA, &id) == RES_HORARIO_AULA);
 }
 
 static void R6(void)
@@ -221,8 +221,8 @@ static void R6(void)
     int id;
 
     autorizacao = 1;
-    VERIFICAR("R6", solicitar("P2", "L201", "09:00", "10:00", PROVA, &id) == RES_OK && id > 0);
-    verificarSituacao("P2", id, ATIVA);
+    VERIFICAR("R6", solicitar("2002", "L201", "09:00", "10:00", PROVA, &id) == RES_OK && id > 0);
+    verificarSituacao("2002", id, ATIVA);
 }
 
 static void R7(void)
@@ -230,22 +230,22 @@ static void R7(void)
     int id;
 
     autorizacao = 1;
-    VERIFICAR("R7", solicitar("P2", "L201", "09:00", "10:00", ESTUDO, &id) == RES_HORARIO_AULA);
+    VERIFICAR("R7", solicitar("2002", "L201", "09:00", "10:00", ESTUDO, &id) == RES_HORARIO_AULA);
 }
 
 static void R8(void)
 {
     int id;
 
-    VERIFICAR("R8", solicitar("A1", "L301", "14:00", "16:00", ESTUDO, &id) == RES_LAB_SEM_MONITOR);
+    VERIFICAR("R8", solicitar("1001", "L301", "14:00", "16:00", ESTUDO, &id) == RES_LAB_SEM_MONITOR);
 }
 
 static void R9(void)
 {
     int id;
 
-    VERIFICAR("R9", res_solicitar("A1", "L301", dataReferencia, "14:00", "16:00", 5, ESTUDO,
-              "M1", antesDasAulas, &id) == RES_OK && id > 0);
+    VERIFICAR("R9", res_solicitar("1001", "L301", dataReferencia, "14:00", "16:00", 5, ESTUDO,
+              "3001", antesDasAulas, &id) == RES_OK && id > 0);
 }
 
 static void R10(void)
@@ -253,8 +253,8 @@ static void R10(void)
     int anterior = prepararEstudo();
     int id;
 
-    VERIFICAR("R10", solicitar("A2", "L201", "15:00", "17:00", ESTUDO, &id) == RES_CONFLITO);
-    verificarSituacao("A1", anterior, ATIVA);
+    VERIFICAR("R10", solicitar("1002", "L201", "15:00", "17:00", ESTUDO, &id) == RES_CONFLITO);
+    verificarSituacao("1001", anterior, ATIVA);
 }
 
 static void R11(void)
@@ -269,12 +269,12 @@ static void R12(void)
 
 static void R13(void)
 {
-    int anterior = prepararReserva("P1", "14:00", "16:00", PROVA);
+    int anterior = prepararReserva("2001", "14:00", "16:00", PROVA);
     int id;
 
-    VERIFICAR("R13", solicitar("P2", "L201", "14:00", "16:00", PROVA, &id)
+    VERIFICAR("R13", solicitar("2002", "L201", "14:00", "16:00", PROVA, &id)
               == RES_CONFLITO && chamadasDeEntrega == 0);
-    verificarSituacao("P1", anterior, ATIVA);
+    verificarSituacao("2001", anterior, ATIVA);
 }
 
 static void R14(void)
@@ -299,7 +299,7 @@ static void R16(void)
     int n;
 
     prepararEstudo();
-    VERIFICAR("R16", res_buscarSalasLivres(dataReferencia, "14:00", "16:00", 30, 0, "A1", livres, &n)
+    VERIFICAR("R16", res_buscarSalasLivres(dataReferencia, "14:00", "16:00", 30, 0, "1001", livres, &n)
               == RES_NENHUMA_SALA && n == 0);
 }
 
@@ -309,7 +309,7 @@ static void R17(void)
     int n;
 
     prepararEstudo();
-    VERIFICAR("R17", res_buscarSalasLivres(dataReferencia, "14:00", "16:00", 30, 0, "P1", livres, &n)
+    VERIFICAR("R17", res_buscarSalasLivres(dataReferencia, "14:00", "16:00", 30, 0, "2001", livres, &n)
               == RES_OK && n == 1 && strcmp(livres[0], "L301") == 0);
 }
 
@@ -317,22 +317,22 @@ static void R18(void)
 {
     int id = prepararEstudo();
 
-    VERIFICAR("R18", res_cancelar(id, "A1") == RES_OK
+    VERIFICAR("R18", res_cancelar(id, "1001") == RES_OK
               && res_verificarConflito("L201", dataReferencia, "14:00", "16:00", NULL) == 0);
-    verificarSituacao("A1", id, CANCELADA);
+    verificarSituacao("1001", id, CANCELADA);
 }
 
 static void R19(void)
 {
     int id = prepararEstudo();
 
-    VERIFICAR("R19", res_cancelar(id, "P2") == RES_NAO_AUTORIZADO);
-    verificarSituacao("A1", id, ATIVA);
+    VERIFICAR("R19", res_cancelar(id, "2002") == RES_NAO_AUTORIZADO);
+    verificarSituacao("1001", id, ATIVA);
 }
 
 static void R20(void)
 {
-    VERIFICAR("R20", res_cancelar(9999, "A1") == RES_NAO_ENCONTRADA);
+    VERIFICAR("R20", res_cancelar(9999, "1001") == RES_NAO_ENCONTRADA);
 }
 
 static void R21(void)
@@ -341,10 +341,10 @@ static void R21(void)
     Reserva lista[MAX_RESERVAS];
     int n;
 
-    VERIFICAR("R21", res_listarPorUsuario("A1", lista, &n) == RES_OK && n == 1
+    VERIFICAR("R21", res_listarPorUsuario("1001", lista, &n) == RES_OK && n == 1
               && lista[0].id == id && lista[0].situacao == ATIVA
               && lista[0].qtdPessoas == 5 && lista[0].finalidade == ESTUDO
-              && strcmp(lista[0].matricula, "A1") == 0 && strcmp(lista[0].codSala, "L201") == 0
+              && strcmp(lista[0].matricula, "1001") == 0 && strcmp(lista[0].codSala, "L201") == 0
               && strcmp(lista[0].data, dataReferencia) == 0 && strcmp(lista[0].inicio, "14:00") == 0
               && strcmp(lista[0].fim, "16:00") == 0);
 }
@@ -354,7 +354,7 @@ static void R21_sem_reservas(void)
     Reserva lista[MAX_RESERVAS];
     int n;
 
-    VERIFICAR("R21 sem reservas", res_listarPorUsuario("A2", lista, &n) == RES_NENHUMA_RESERVA && n == 0);
+    VERIFICAR("R21 sem reservas", res_listarPorUsuario("1002", lista, &n) == RES_NENHUMA_RESERVA && n == 0);
 }
 
 static void R22(void)
@@ -381,7 +381,7 @@ static void R25(void)
 {
     int id;
 
-    VERIFICAR("R25", solicitar("P1", "L201", "09:00", "10:00", PROVA, &id) == RES_OK && id > 0);
+    VERIFICAR("R25", solicitar("2001", "L201", "09:00", "10:00", PROVA, &id) == RES_OK && id > 0);
 }
 
 static void R26(void)
@@ -389,14 +389,14 @@ static void R26(void)
     int id;
 
     autorizacao = 1;
-    VERIFICAR("R26", solicitar("A1", "L201", "09:00", "10:00", PROVA, &id) == RES_HORARIO_AULA);
+    VERIFICAR("R26", solicitar("1001", "L201", "09:00", "10:00", PROVA, &id) == RES_HORARIO_AULA);
 }
 
 static void R27(void)
 {
     int id;
 
-    VERIFICAR("R27 recusa da Grade", solicitar("P2", "L201", "10:00", "12:00", PROVA, &id)
+    VERIFICAR("R27 recusa da Grade", solicitar("2002", "L201", "10:00", "12:00", PROVA, &id)
               == RES_HORARIO_AULA);
 }
 
@@ -405,7 +405,7 @@ static void R27_ambas_aulas_autorizam(void)
     int id;
 
     autorizacao = 1;
-    VERIFICAR("R27 aceite da Grade", solicitar("P2", "L201", "10:00", "12:00", PROVA, &id)
+    VERIFICAR("R27 aceite da Grade", solicitar("2002", "L201", "10:00", "12:00", PROVA, &id)
               == RES_OK && id > 0);
 }
 
@@ -414,19 +414,19 @@ static void R28(void)
     int anterior = prepararEstudo();
     int id;
 
-    VERIFICAR("R28 estudo de professor", solicitar("P1", "L201", "14:00", "16:00", ESTUDO, &id)
+    VERIFICAR("R28 estudo de professor", solicitar("2001", "L201", "14:00", "16:00", ESTUDO, &id)
               == RES_CONFLITO && chamadasDeEntrega == 0);
-    verificarSituacao("A1", anterior, ATIVA);
+    verificarSituacao("1001", anterior, ATIVA);
 }
 
 static void R28_aluno_contra_professor(void)
 {
-    int anterior = prepararReserva("P1", "14:00", "16:00", PROVA);
+    int anterior = prepararReserva("2001", "14:00", "16:00", PROVA);
     int id;
 
-    VERIFICAR("R28 aluno contra professor", solicitar("A1", "L201", "14:00", "16:00", ESTUDO, &id)
+    VERIFICAR("R28 aluno contra professor", solicitar("1001", "L201", "14:00", "16:00", ESTUDO, &id)
               == RES_CONFLITO && chamadasDeEntrega == 0);
-    verificarSituacao("P1", anterior, ATIVA);
+    verificarSituacao("2001", anterior, ATIVA);
 }
 
 static void R29(void)
@@ -437,35 +437,34 @@ static void R29(void)
     recusarEntrega = 1;
     VERIFICAR("R29", solicitarProvaNoHorario("10:00", "14:00", "16:00", &id)
               == RES_FALHA_NOTIFICACAO && id == 0 && chamadasDeEntrega == 1 && avisos == 0);
-    verificarSituacao("A1", anterior, ATIVA);
+    verificarSituacao("1001", anterior, ATIVA);
     verificarSemProva();
 }
 
 static void R30(void)
 {
-    int primeiro = prepararReserva("A1", "14:00", "15:00", ESTUDO);
-    int segundo = prepararReserva("A2", "15:00", "16:00", ESTUDO);
+    int primeiro = prepararReserva("1001", "14:00", "15:00", ESTUDO);
+    int segundo = prepararReserva("1002", "15:00", "16:00", ESTUDO);
     int id;
 
     VERIFICAR("R30", solicitarProvaNoHorario("12:00", "14:30", "15:30", &id) == RES_OK
               && chamadasDeEntrega == 1 && avisos == 2
-              && strcmp(destinatarios[0], "A1") == 0 && strcmp(destinatarios[1], "A2") == 0);
-    verificarSituacao("A1", primeiro, CANCELADA);
-    verificarSituacao("A2", segundo, CANCELADA);
-    verificarSituacao("P1", id, ATIVA);
+              && strcmp(destinatarios[0], "1001") == 0 && strcmp(destinatarios[1], "1002") == 0);
+    verificarSituacao("1001", primeiro, CANCELADA);
+    verificarSituacao("1002", segundo, CANCELADA);
+    verificarSituacao("2001", id, ATIVA);
 }
 
 static void R31(void)
 {
-    /* O primeiro conflito encontrado tem prazo suficiente. */
-    int segundo = prepararReserva("A2", "15:00", "16:00", ESTUDO);
-    int primeiro = prepararReserva("A1", "14:00", "15:00", ESTUDO);
+    int segundo = prepararReserva("1002", "15:00", "16:00", ESTUDO);
+    int primeiro = prepararReserva("1001", "14:00", "15:00", ESTUDO);
     int id;
 
     VERIFICAR("R31", solicitarProvaNoHorario("12:01", "14:30", "15:30", &id)
               == RES_ANTECEDENCIA_INSUFICIENTE && id == 0 && chamadasDeEntrega == 0);
-    verificarSituacao("A1", primeiro, ATIVA);
-    verificarSituacao("A2", segundo, ATIVA);
+    verificarSituacao("1001", primeiro, ATIVA);
+    verificarSituacao("1002", segundo, ATIVA);
     verificarSemProva();
 }
 
@@ -475,29 +474,29 @@ static void prazo_na_virada_do_ano(void)
     const DataHora antes = {"31/12/2026", "23:30"};
     int anterior, id;
 
-    VERIFICAR("preparo estudo", res_solicitar("A1", "L201", data, "01:30", "02:30", 5,
+    VERIFICAR("preparo estudo", res_solicitar("1001", "L201", data, "01:30", "02:30", 5,
               ESTUDO, "", antes, &anterior) == RES_OK);
-    VERIFICAR("duas horas na virada do ano", res_solicitar("P1", "L201", data, "01:30", "02:30",
+    VERIFICAR("duas horas na virada do ano", res_solicitar("2001", "L201", data, "01:30", "02:30",
               5, PROVA, "", antes, &id) == RES_OK && chamadasDeEntrega == 1 && avisos == 1);
-    verificarSituacao("A1", anterior, CANCELADA);
-    verificarSituacao("P1", id, ATIVA);
+    verificarSituacao("1001", anterior, CANCELADA);
+    verificarSituacao("2001", id, ATIVA);
 }
 
 static void laboratorio_liberado(void)
 {
     int id;
 
-    VERIFICAR("preparo laboratório", res_solicitar("A1", "L301", dataReferencia, "14:00", "16:00",
-              5, ESTUDO, "M1", antesDasAulas, &id) == RES_OK);
-    VERIFICAR("cancelar estudo", res_cancelar(id, "A1") == RES_OK);
-    VERIFICAR("lab liberado após cancelamento", solicitar("P1", "L301", "14:00", "16:00", PROVA, &id) == RES_OK);
+    VERIFICAR("preparo laboratório", res_solicitar("1001", "L301", dataReferencia, "14:00", "16:00",
+              5, ESTUDO, "3001", antesDasAulas, &id) == RES_OK);
+    VERIFICAR("cancelar estudo", res_cancelar(id, "1001") == RES_OK);
+    VERIFICAR("lab liberado após cancelamento", solicitar("2001", "L301", "14:00", "16:00", PROVA, &id) == RES_OK);
 }
 
 static void sala_ausente(void)
 {
     int id;
 
-    VERIFICAR("sala ausente", solicitar("P1", "L999", "14:00", "16:00", PROVA, &id) == RES_SALA_INEXISTENTE
+    VERIFICAR("sala ausente", solicitar("2001", "L999", "14:00", "16:00", PROVA, &id) == RES_SALA_INEXISTENTE
               && id == 0);
 }
 
@@ -505,7 +504,7 @@ static void intervalo_invalido(void)
 {
     int id;
 
-    VERIFICAR("intervalo inválido", solicitar("P1", "L201", "16:00", "14:00", PROVA, &id) == RES_DADOS_INVALIDOS
+    VERIFICAR("intervalo inválido", solicitar("2001", "L201", "16:00", "14:00", PROVA, &id) == RES_DADOS_INVALIDOS
               && id == 0);
 }
 

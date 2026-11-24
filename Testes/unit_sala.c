@@ -5,7 +5,7 @@
 static void prepararLaboratorio(void)
 {
     VERIFICAR("preparo L301", sala_cadastrar("L301", LABORATORIO, 30, 0) == SALA_OK);
-    VERIFICAR("preparo M1", sala_registrarBiometria("L301", "M1") == SALA_OK);
+    VERIFICAR("preparo 3001", sala_registrarBiometria("L301", "3001") == SALA_OK);
 }
 
 static void prepararSalas(void)
@@ -108,19 +108,19 @@ static void S11(void)
 
 static void S12(void)
 {
-    VERIFICAR("S12", sala_registrarBiometria("L999", "M1") == SALA_NAO_ENCONTRADA);
+    VERIFICAR("S12", sala_registrarBiometria("L999", "3001") == SALA_NAO_ENCONTRADA);
 }
 
 static void S13(void)
 {
     prepararLaboratorio();
-    VERIFICAR("S13", sala_temMonitorComBiometria("L301", "M1") == 1);
+    VERIFICAR("S13", sala_temMonitorComBiometria("L301", "3001") == 1);
 }
 
 static void S13_sem_vinculo(void)
 {
     prepararLaboratorio();
-    VERIFICAR("S13", sala_temMonitorComBiometria("L301", "A1") == 0);
+    VERIFICAR("S13", sala_temMonitorComBiometria("L301", "1001") == 0);
 }
 
 static void validar_sem_cadastrar(void)
@@ -135,13 +135,20 @@ static void biometria_por_laboratorio(void)
 {
     prepararLaboratorio();
     VERIFICAR("preparo L302", sala_cadastrar("L302", LABORATORIO, 30, 0) == SALA_OK);
-    VERIFICAR("biometria em laboratório específico", !sala_temMonitorComBiometria("L302", "M1"));
+    VERIFICAR("biometria em laboratório específico", !sala_temMonitorComBiometria("L302", "3001"));
 }
 
 static void repetir_biometria(void)
 {
     prepararLaboratorio();
-    VERIFICAR("repetição de biometria", sala_registrarBiometria("L301", "M1") == SALA_OK);
+    VERIFICAR("repetição de biometria", sala_registrarBiometria("L301", "3001") == SALA_OK);
+}
+
+static void matricula_do_monitor_invalida(void)
+{
+    prepararLaboratorio();
+    VERIFICAR("monitor com matrícula inválida", sala_registrarBiometria("L301", "M3001") == SALA_DADOS_INVALIDOS
+              && !sala_temMonitorComBiometria("L301", "M3001"));
 }
 
 int main(int argc, char *argv[])
@@ -150,7 +157,7 @@ int main(int argc, char *argv[])
         CASO(S1), CASO(S2), CASO(S3), CASO(S4), CASO(S5), CASO(S6), CASO(S7), CASO(S7_ausente),
         CASO(S8), CASO(S8_ausente), CASO(S9), CASO(S10), CASO(S11), CASO(S12), CASO(S13),
         CASO(S13_sem_vinculo), CASO(validar_sem_cadastrar), CASO(biometria_por_laboratorio),
-        CASO(repetir_biometria)
+        CASO(repetir_biometria), CASO(matricula_do_monitor_invalida)
     };
     return executarCasos(argc, argv, casos, sizeof casos / sizeof casos[0]);
 }

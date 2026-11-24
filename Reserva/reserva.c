@@ -14,7 +14,6 @@
 static Reserva reservas[MAX_RESERVAS];
 static int qtdReservas;
 
-/* Datas e horas armazenadas já têm formato validado e canônico. */
 static int conflita(const Reserva *reserva, const char *sala, const char *data,
                     int inicio, int fim)
 {

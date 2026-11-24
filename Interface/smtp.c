@@ -9,7 +9,6 @@
 void smtp_preparar(void)
 {
 #ifndef _WIN32
-    /* Se o processo de entrega fechar o pipe, a falha volta ao módulo Reserva. */
     signal(SIGPIPE, SIG_IGN);
 #endif
 }

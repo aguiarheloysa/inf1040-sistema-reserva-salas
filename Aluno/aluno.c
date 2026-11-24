@@ -4,6 +4,8 @@
 #include <ctype.h>
 #include <string.h>
 
+#include "matricula.h"
+
 #define MAX_USUARIOS 500
 #define TAM_NOME 100
 
@@ -52,7 +54,7 @@ static int emailValido(const char *email)
 
 int usu_cadastrar(char *matricula, char *nome, char *email, TipoUsuario tipo)
 {
-    if (!campoValido(matricula, TAM))
+    if (!matricula_valida(matricula))
         return USU_DADOS_INVALIDOS;
     if (buscar(matricula))
         return USU_JA_EXISTE;

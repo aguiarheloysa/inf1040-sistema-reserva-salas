@@ -1,6 +1,3 @@
-
-"""Entrega um aviso por SMTP. Lê a quantidade, os endereços e o corpo via stdin."""
-
 import os
 import smtplib
 import ssl
@@ -50,7 +47,6 @@ def entregar(destinatarios, corpo):
             codigo, resposta = cliente.rcpt(endereco.addr_spec)
             if codigo not in (250, 251):
                 raise smtplib.SMTPRecipientsRefused({endereco.addr_spec: (codigo, resposta)})
-        # Envia o corpo somente após o aceite de todos os destinatários.
         codigo, resposta = cliente.data(mensagem.as_bytes())
         if codigo != 250:
             raise smtplib.SMTPDataError(codigo, resposta)

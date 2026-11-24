@@ -125,7 +125,7 @@ static int exigirProfessor(char *matricula)
 
 static void cadastrarUsuario(void)
 {
-    const char *perguntas[] = {"Matrícula:", "Nome:", "E-mail:", "Tipo (0 aluno, 1 professor):"};
+    const char *perguntas[] = {"Matrícula (somente números):", "Nome:", "E-mail:", "Tipo (0 aluno, 1 professor):"};
     char campos[QUANTIDADE(perguntas)][TAM_ENTRADA];
     int tipo;
 

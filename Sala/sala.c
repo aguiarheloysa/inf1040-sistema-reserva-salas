@@ -3,6 +3,8 @@
 
 #include <string.h>
 
+#include "matricula.h"
+
 #define MAX_BIOMETRIAS 1000
 
 typedef struct {
@@ -126,7 +128,7 @@ int sala_registrarBiometria(char *codigo, char *matMonitor)
 
     if (!sala)
         return SALA_NAO_ENCONTRADA;
-    if (!matMonitor || !*matMonitor || strlen(matMonitor) >= TAM || sala->tipo != LABORATORIO)
+    if (!matricula_valida(matMonitor) || sala->tipo != LABORATORIO)
         return SALA_DADOS_INVALIDOS;
     if (temBiometria(sala, matMonitor))
         return SALA_OK;

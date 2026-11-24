@@ -20,11 +20,9 @@
 #define RES_LIMITE_ATINGIDO 13
 #define RES_FALHA_NOTIFICACAO 14
 
-/* lista deve ter espaço para MAX_SALAS códigos. */
 int res_buscarSalasLivres(const char *d, const char *ini, const char *fim, int qtdPessoas,
                          int precisaQuadro, char *matricula, char lista[][TAM], int *n);
 
-/* Se houver mais de um conflito retorna o primeiro ID ativo encontrado. */
 int res_verificarConflito(char *codSala, const char *d, const char *ini, const char *fim, int *idConflitante);
 
 int res_solicitar(char *matricula, char *codSala, const char *d, const char *ini, const char *fim,
@@ -33,7 +31,6 @@ int res_solicitar(char *matricula, char *codSala, const char *d, const char *ini
 
 int res_cancelar(int idReserva, char *matricula);
 
-/* Inclui o histórico de reservas canceladas. lista comporta MAX_RESERVAS registros. */
 int res_listarPorUsuario(char *matricula, Reserva lista[], int *n);
 
 #endif

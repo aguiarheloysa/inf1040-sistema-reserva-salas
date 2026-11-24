@@ -22,7 +22,6 @@ int sala_verificarCadastro(char *codigo, TipoSala tipo, int capacidade, int temQ
 int sala_cadastrar(char *codigo, TipoSala tipo, int capacidade, int temQuadro);
 int sala_obterCapacidade(char *codigo, int *capacidade);
 int sala_obterTipo(char *codigo, TipoSala *tipo);
-/* lista deve ter espaço para MAX_SALAS códigos. */
 int sala_listarPorCapacidade(int qtdPessoas, int precisaQuadro, char lista[][TAM], int *n);
 int sala_registrarBiometria(char *codigo, char *matMonitor);
 int sala_temMonitorComBiometria(char *codigo, char *matMonitor);
