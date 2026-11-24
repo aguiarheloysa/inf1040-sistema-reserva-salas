@@ -7,6 +7,7 @@ from flask import Flask, render_template
 
 from .bridge import BackendBridge
 from .routes.principal import bp as principal_bp
+from .routes.usuarios import bp as usuarios_bp
 
 
 def create_app(config: dict | None = None) -> Flask:
@@ -26,6 +27,12 @@ def create_app(config: dict | None = None) -> Flask:
         dll_path=Path(caminho) if caminho is not None else None
     )
     app.register_blueprint(principal_bp)
+    app.register_blueprint(usuarios_bp)
+
+    @app.errorhandler(400)
+    def requisicao_invalida(erro):
+        return render_template("erro.html", codigo=400,
+                               mensagem="Requisição inválida. Reabra o formulário e tente novamente."), 400
 
     @app.errorhandler(404)
     def pagina_nao_encontrada(erro):
@@ -49,13 +56,9 @@ def create_app(config: dict | None = None) -> Flask:
 
 def main() -> None:
     # O acesso ao núcleo C é sincronizado pelo RLock de backend.py.
-    create_app().run(
-        host="127.0.0.1",
-        port=5000,
-        debug=False,
-        threaded=True,
-        use_reloader=False,
-    )
+    create_app().run(host="127.0.0.1", port=5000, debug=False,
+                     threaded=True, use_reloader=False)
+
 
 if __name__ == "__main__":
     main()

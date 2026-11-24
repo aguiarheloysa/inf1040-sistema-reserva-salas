@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block titulo %}Cadastro de usuário | Sistema de Reserva de Salas{% endblock %}
+{% block conteudo %}
+<h1>Cadastrar usuário</h1>
+<form class="painel formulario" method="post" action="{{ url_for('usuarios.cadastrar') }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <label for="matricula">Matrícula</label>
+    <input id="matricula" name="matricula" type="text" maxlength="19" required value="{{ dados.matricula }}">
+    <label for="nome">Nome</label>
+    <input id="nome" name="nome" type="text" maxlength="99" required value="{{ dados.nome }}">
+    <label for="email">E-mail</label>
+    <input id="email" name="email" type="email" maxlength="254" required value="{{ dados.email }}">
+    <label for="tipo">Tipo de usuário</label>
+    <select id="tipo" name="tipo" required>
+        {% for valor, rotulo in tipos.items() %}
+        <option value="{{ valor }}"{% if dados.tipo == valor %} selected{% endif %}>{{ rotulo }}</option>
+        {% endfor %}
+    </select>
+    <button type="submit">Cadastrar</button>
+</form>
+<p><a href="{{ url_for('usuarios.consultar') }}">Consultar usuário</a> · <a href="{{ url_for('usuarios.index') }}">Voltar</a></p>
+{% endblock %}

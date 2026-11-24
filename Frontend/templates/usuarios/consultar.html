@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block titulo %}Consulta de usuário | Sistema de Reserva de Salas{% endblock %}
+{% block conteudo %}
+<h1>Consultar usuário</h1>
+<form class="painel formulario" method="get" action="{{ url_for('usuarios.consultar') }}">
+    <label for="matricula">Matrícula</label>
+    <input id="matricula" name="matricula" type="text" maxlength="19" required value="{{ matricula }}">
+    <button type="submit">Consultar</button>
+</form>
+{% if usuario is not none %}
+<section class="painel resultado">
+    <h2>Dados do usuário</h2>
+    <dl>
+        <dt>Matrícula</dt><dd>{{ usuario.matricula }}</dd>
+        <dt>Tipo</dt><dd>{{ usuario.tipo }}</dd>
+        <dt>E-mail</dt><dd>{{ usuario.email }}</dd>
+    </dl>
+</section>
+{% endif %}
+<p><a href="{{ url_for('usuarios.cadastrar') }}">Cadastrar usuário</a> · <a href="{{ url_for('usuarios.index') }}">Voltar</a></p>
+{% endblock %}
