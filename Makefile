@@ -1,7 +1,7 @@
 
 CC ?= gcc
 CFLAGS ?= -std=c11 -O2 -Wall -Wextra -Wpedantic
-CPPFLAGS += -IAluno -ISala -IGrade -INotificacao -IReserva -IComum
+CPPFLAGS += -IAluno -ISala -IGrade -INotificacao -IReserva -ITempo
 
 ifeq ($(OS),Windows_NT)
 EXE := .exe
@@ -11,14 +11,14 @@ PYTHON ?= python3
 endif
 
 BUILD := build
-TEMPO := Comum/tempo.c
+TEMPO := Tempo/tempo.c
 USUARIO := Aluno/aluno.c
 SALA := Sala/sala.c
 GRADE := Grade/grade.c
 NOTIFICACAO := Notificacao/notificacao.c
 RESERVA := Reserva/reserva.c
 MODULOS := $(TEMPO) $(USUARIO) $(SALA) $(GRADE) $(NOTIFICACAO) $(RESERVA)
-CABECALHOS := $(wildcard Aluno/*.h Sala/*.h Grade/*.h Notificacao/*.h Reserva/*.h Comum/*.h)
+CABECALHOS := $(wildcard Aluno/*.h Sala/*.h Grade/*.h Notificacao/*.h Reserva/*.h Tempo/*.h)
 APP := $(BUILD)/sistema_reserva$(EXE)
 UNITARIOS := $(addprefix $(BUILD)/unit_,$(addsuffix $(EXE),tempo usuario sala grade notificacao reserva))
 INTEGRACAO := $(BUILD)/integracao$(EXE)
